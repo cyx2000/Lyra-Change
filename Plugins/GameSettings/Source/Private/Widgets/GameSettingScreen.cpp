@@ -130,7 +130,10 @@ void UGameSettingScreen::NavigateToSettings(const TArray<FName>& SettingDevNames
 
 void UGameSettingScreen::HandleSettingChanged(UGameSetting* Setting, EGameSettingChangeReason Reason)
 {
-	OnSettingsDirtyStateChanged(true);
+	if(Reason == EGameSettingChangeReason::Change)
+	{
+		OnSettingsDirtyStateChanged(true);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

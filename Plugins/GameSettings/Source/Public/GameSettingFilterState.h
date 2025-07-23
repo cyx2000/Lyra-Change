@@ -20,6 +20,7 @@ enum class EGameSettingChangeReason : uint8
 	DependencyChanged,
 	ResetToDefault,
 	RestoreToInitial,
+	InitValue,
 };
 
 /**

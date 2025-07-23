@@ -33,7 +33,7 @@ public:
 	}
 
 	virtual TOptional<double> GetDefaultValue() const						PURE_VIRTUAL(, return TOptional<double>(););
-	virtual void SetValue(double Value, EGameSettingChangeReason Reason = EGameSettingChangeReason::Change)	PURE_VIRTUAL(, );
+	virtual void SetValue(double Value, EGameSettingChangeReason Reason = EGameSettingChangeReason::InitValue)	PURE_VIRTUAL(, );
 	virtual double GetValue() const											PURE_VIRTUAL(, return 0;);
 	virtual TRange<double> GetSourceRange() const							PURE_VIRTUAL(, return TRange<double>(););
 	virtual double GetSourceStep() const									PURE_VIRTUAL(, return 0.01;);
