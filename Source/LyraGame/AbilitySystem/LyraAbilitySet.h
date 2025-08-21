@@ -16,7 +16,7 @@ class ULyraAbilitySystemComponent;
 class ULyraGameplayAbility;
 class UObject;
 
-
+#define UE_API LYRAGAME_API
 /**
  * FLyraAbilitySet_GameplayAbility
  *
@@ -93,11 +93,11 @@ struct FLyraAbilitySet_GrantedHandles
 
 public:
 
-	void AddAbilitySpecHandle(const FGameplayAbilitySpecHandle& Handle);
-	void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
-	void AddAttributeSet(UAttributeSet* Set);
+	UE_API void AddAbilitySpecHandle(const FGameplayAbilitySpecHandle& Handle);
+	UE_API void AddGameplayEffectHandle(const FActiveGameplayEffectHandle& Handle);
+	UE_API void AddAttributeSet(UAttributeSet* Set);
 
-	void TakeFromAbilitySystem(ULyraAbilitySystemComponent* LyraASC);
+	UE_API void TakeFromAbilitySystem(ULyraAbilitySystemComponent* LyraASC);
 
 protected:
 
@@ -131,7 +131,7 @@ public:
 
 	// Grants the ability set to the specified ability system component.
 	// The returned handles can be used later to take away anything that was granted.
-	void GiveToAbilitySystem(ULyraAbilitySystemComponent* LyraASC, FLyraAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
+	UE_API void GiveToAbilitySystem(ULyraAbilitySystemComponent* LyraASC, FLyraAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
 
 protected:
 
@@ -147,3 +147,5 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Attribute Sets", meta=(TitleProperty=AttributeSet))
 	TArray<FLyraAbilitySet_AttributeSet> GrantedAttributes;
 };
+
+#undef UE_API

@@ -136,8 +136,13 @@ void ULyraAbilitySet::GiveToAbilitySystem(ULyraAbilitySystemComponent* LyraASC, 
 			continue;
 		}
 
+		FGameplayEffectContextHandle NewEffectContext = LyraASC->MakeEffectContext();
+		if(SourceObject)
+		{
+			NewEffectContext.AddSourceObject(SourceObject);
+		}
 		const UGameplayEffect* GameplayEffect = EffectToGrant.GameplayEffect->GetDefaultObject<UGameplayEffect>();
-		const FActiveGameplayEffectHandle GameplayEffectHandle = LyraASC->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, LyraASC->MakeEffectContext());
+		const FActiveGameplayEffectHandle GameplayEffectHandle = LyraASC->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, NewEffectContext);
 
 		if (OutGrantedHandles)
 		{

@@ -10,6 +10,7 @@
 struct FGameplayTagStackContainer;
 struct FNetDeltaSerializeInfo;
 
+#define UE_API LYRAGAME_API
 /**
  * Represents one stack of a gameplay tag (tag + count)
  */
@@ -52,19 +53,19 @@ struct FGameplayTagStackContainer : public FFastArraySerializer
 
 public:
 	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
-	void AddStack(FGameplayTag Tag, int32 StackCount);
+	UE_API void AddStack(FGameplayTag Tag, int32 StackCount);
 
 	// Removes a specified number of stacks from the tag (does nothing if StackCount is below 1)
-	void RemoveStack(FGameplayTag Tag, int32 StackCount);
+	UE_API void RemoveStack(FGameplayTag Tag, int32 StackCount);
 
 	// Returns the stack count of the specified tag (or 0 if the tag is not present)
-	int32 GetStackCount(FGameplayTag Tag) const
+	UE_API int32 GetStackCount(FGameplayTag Tag) const
 	{
 		return TagToCountMap.FindRef(Tag);
 	}
 
 	// Returns true if there is at least one stack of the specified tag
-	bool ContainsTag(FGameplayTag Tag) const
+	UE_API bool ContainsTag(FGameplayTag Tag) const
 	{
 		return TagToCountMap.Contains(Tag);
 	}
@@ -97,3 +98,5 @@ struct TStructOpsTypeTraits<FGameplayTagStackContainer> : public TStructOpsTypeT
 		WithNetDeltaSerializer = true,
 	};
 };
+
+#undef UE_API

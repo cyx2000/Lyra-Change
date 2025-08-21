@@ -13,6 +13,8 @@ class USkeletalMesh;
 
 //////////////////////////////////////////////////////////////////////
 
+#define UE_API LYRAGAME_API
+
 USTRUCT(BlueprintType)
 struct FLyraAnimLayerSelectionEntry
 {
@@ -41,7 +43,7 @@ struct FLyraAnimLayerSelectionSet
 	TSubclassOf<UAnimInstance> DefaultLayer;
 
 	// Choose the best layer given the rules
-	TSubclassOf<UAnimInstance> SelectBestLayer(const FGameplayTagContainer& CosmeticTags) const;
+	UE_API TSubclassOf<UAnimInstance> SelectBestLayer(const FGameplayTagContainer& CosmeticTags) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -78,5 +80,7 @@ struct FLyraAnimBodyStyleSelectionSet
 	TObjectPtr<UPhysicsAsset> ForcedPhysicsAsset = nullptr;
 
 	// Choose the best body style skeletal mesh given the rules
-	USkeletalMesh* SelectBestBodyStyle(const FGameplayTagContainer& CosmeticTags) const;
+	UE_API USkeletalMesh* SelectBestBodyStyle(const FGameplayTagContainer& CosmeticTags) const;
 };
+
+#undef UE_API

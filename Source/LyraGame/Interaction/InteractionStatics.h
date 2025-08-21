@@ -15,8 +15,10 @@ struct FFrame;
 struct FHitResult;
 struct FOverlapResult;
 
+#define UE_API LYRAGAME_API
+
 /**  */
-UCLASS()
+UCLASS(MinimalAPI)
 class UInteractionStatics : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -26,7 +28,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static AActor* GetActorFromInteractableTarget(TScriptInterface<IInteractableTarget> InteractableTarget);
+	static UE_API AActor* GetActorFromInteractableTarget(TScriptInterface<IInteractableTarget> InteractableTarget);
 
 	UFUNCTION(BlueprintCallable)
 	static void GetInteractableTargetsFromActor(AActor* Actor, TArray<TScriptInterface<IInteractableTarget>>& OutInteractableTargets);
@@ -34,3 +36,5 @@ public:
 	static void AppendInteractableTargetsFromOverlapResults(const TArray<FOverlapResult>& OverlapResults, TArray<TScriptInterface<IInteractableTarget>>& OutInteractableTargets);
 	static void AppendInteractableTargetsFromHitResult(const FHitResult& HitResult, TArray<TScriptInterface<IInteractableTarget>>& OutInteractableTargets);
 };
+
+#undef UE_API

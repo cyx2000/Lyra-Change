@@ -16,9 +16,11 @@ struct FHitResult;
 struct FInteractionQuery;
 template <typename InterfaceType> class TScriptInterface;
 
+#define UE_API LYRAGAME_API
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractableObjectsChangedEvent, const TArray<FInteractionOption>&, InteractableOptions);
 
-UCLASS(Abstract)
+UCLASS(Abstract, MinimalAPI)
 class UAbilityTask_WaitForInteractableTargets : public UAbilityTask
 {
 	GENERATED_UCLASS_BODY()
@@ -29,13 +31,13 @@ public:
 
 protected:
 
-	static void LineTrace(FHitResult& OutHitResult, const UWorld* World, const FVector& Start, const FVector& End, FName ProfileName, const FCollisionQueryParams Params);
+	static UE_API  void LineTrace(FHitResult& OutHitResult, const UWorld* World, const FVector& Start, const FVector& End, FName ProfileName, const FCollisionQueryParams Params);
 
 	void AimWithPlayerController(const AActor* InSourceActor, FCollisionQueryParams Params, const FVector& TraceStart, float MaxRange, FVector& OutTraceEnd, bool bIgnorePitch = false) const;
 
-	static bool ClipCameraRayToAbilityRange(FVector CameraLocation, FVector CameraDirection, FVector AbilityCenter, float AbilityRange, FVector& ClippedPosition);
+	static UE_API bool ClipCameraRayToAbilityRange(FVector CameraLocation, FVector CameraDirection, FVector AbilityCenter, float AbilityRange, FVector& ClippedPosition);
 
-	void UpdateInteractableOptions(const FInteractionQuery& InteractQuery, const TArray<TScriptInterface<IInteractableTarget>>& InteractableTargets);
+	UE_API void UpdateInteractableOptions(const FInteractionQuery& InteractQuery, const TArray<TScriptInterface<IInteractableTarget>>& InteractableTargets);
 
 	FCollisionProfileName TraceProfile;
 
@@ -44,3 +46,5 @@ protected:
 
 	TArray<FInteractionOption> CurrentOptions;
 };
+
+#undef UE_API
