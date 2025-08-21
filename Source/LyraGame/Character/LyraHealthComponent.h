@@ -84,6 +84,7 @@ public:
 	UE_API virtual void FinishDeath();
 
 	// Applies enough damage to kill the owner.
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Lyra|Health", BlueprintAuthorityOnly)
 	UE_API virtual void DamageSelfDestruct(bool bFellOutOfWorld = false);
 
 public:

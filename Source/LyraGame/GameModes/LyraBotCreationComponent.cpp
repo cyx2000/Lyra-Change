@@ -23,7 +23,7 @@ void ULyraBotCreationComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen for the experience load to complete
-	AGameStateBase* GameState = GetGameStateChecked<AGameStateBase>();
+	AGameStateBase* GameState = GetWorld()->GetGameState();
 	ULyraExperienceManagerComponent* ExperienceComponent = GameState->FindComponentByClass<ULyraExperienceManagerComponent>();
 	check(ExperienceComponent);
 	ExperienceComponent->CallOrRegister_OnExperienceLoaded_LowPriority(FOnLyraExperienceLoaded::FDelegate::CreateUObject(this, &ThisClass::OnExperienceLoaded));
