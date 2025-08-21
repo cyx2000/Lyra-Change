@@ -103,7 +103,7 @@ public class LyraGameTarget : TargetRules
 			// return true;
 		}
 
-		bool bIsBuildMachine = (Environment.GetEnvironmentVariable("IsBuildMachine") == "1");
+		bool bIsBuildMachine = Target.AdditionalProperties.GetProperty("IsBuildMachine") == "1";
 		if (bIsBuildMachine)
 		{
 			// This could be used to enable all plugins for build machines
@@ -150,10 +150,13 @@ public class LyraGameTarget : TargetRules
 					try
 					{
 						JsonObject RawObject;
-						if (!AllPluginRootJsonObjectsByName.TryGetValue(PluginFile.GetFileNameWithoutExtension(), out RawObject))
+						lock (AllPluginRootJsonObjectsByName)
 						{
-							RawObject = JsonObject.Read(PluginFile);
-							AllPluginRootJsonObjectsByName.Add(PluginFile.GetFileNameWithoutExtension(), RawObject);
+							if (!AllPluginRootJsonObjectsByName.TryGetValue(PluginFile.GetFileNameWithoutExtension(), out RawObject))
+							{
+								RawObject = JsonObject.Read(PluginFile);
+								AllPluginRootJsonObjectsByName.Add(PluginFile.GetFileNameWithoutExtension(), RawObject);
+							}
 						}
 
 						// Validate that all GameFeaturePlugins are disabled by default

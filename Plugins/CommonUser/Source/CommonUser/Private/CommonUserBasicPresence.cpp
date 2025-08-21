@@ -109,8 +109,8 @@ void UCommonUserBasicPresence::OnNotifySessionInformationChanged(ECommonSessionI
 					UE::Online::FPartialUpdatePresence::Params UpdateParams;
 					UpdateParams.LocalAccountId = LocalPlayer->GetPreferredUniqueNetId().GetV2();
 					UpdateParams.Mutations.StatusString.Emplace(*SessionStateToBackendKey(SessionStatus));
-					UpdateParams.Mutations.UpdatedProperties.Emplace(PresenceKeyGameMode, GameMode);
-					UpdateParams.Mutations.UpdatedProperties.Emplace(PresenceKeyMapName, MapNameTruncated);
+					UpdateParams.Mutations.UpdatedProperties.AddVariant(PresenceKeyGameMode, GameMode);
+					UpdateParams.Mutations.UpdatedProperties.AddVariant(PresenceKeyMapName, MapNameTruncated);
 
 					Presence->PartialUpdatePresence(MoveTemp(UpdateParams));
 				}
