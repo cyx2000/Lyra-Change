@@ -130,9 +130,12 @@ void UGameSettingScreen::NavigateToSettings(const TArray<FName>& SettingDevNames
 
 void UGameSettingScreen::HandleSettingChanged(UGameSetting* Setting, EGameSettingChangeReason Reason)
 {
-	if(Reason == EGameSettingChangeReason::Change)
-	{
-		OnSettingsDirtyStateChanged(true);
+	switch (Reason) {
+		case EGameSettingChangeReason::Change:
+			OnSettingsDirtyStateChanged(true);
+		break;
+		default:
+			return;
 	}
 }
 

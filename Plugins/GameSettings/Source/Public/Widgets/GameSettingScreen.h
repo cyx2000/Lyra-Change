@@ -5,7 +5,7 @@
 #include "CommonActivatableWidget.h"
 #include "GameSettingRegistry.h"
 #include "GameSettingRegistryChangeTracker.h"
-
+#include "GameSettingFilterState.h"
 #include "GameSettingScreen.generated.h"
 
 #define UE_API GAMESETTINGS_API
@@ -17,7 +17,7 @@ class UObject;
 class UWidget;
 struct FFrame;
 
-enum class EGameSettingChangeReason : uint8;
+// enum class EGameSettingChangeReason : uint8;
 
 /**
  * 
@@ -28,6 +28,9 @@ class UGameSettingScreen : public UCommonActivatableWidget
 	GENERATED_BODY()
 public:
 
+	UFUNCTION(BlueprintCallable)
+	bool HaveSettingsBeenChanged() const { return ChangeTracker.HaveSettingsBeenChanged(); }
+	
 protected:
 	UE_API virtual void NativeOnInitialized() override;
 	UE_API virtual void NativeOnActivated() override;
@@ -61,9 +64,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	UE_API virtual void ApplyChanges();
-
-	UFUNCTION(BlueprintCallable)
-	bool HaveSettingsBeenChanged() const { return ChangeTracker.HaveSettingsBeenChanged(); }
 
 	UE_API void ClearDirtyState();
 
