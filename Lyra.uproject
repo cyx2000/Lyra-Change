@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "",
-	"Category": "",
+	"EngineAssociation": "{FB33BA10-031B-435A-AC97-8778C59383C9}",
+	"Category": "Samples",
 	"Description": "",
 	"Modules": [
 		{
@@ -343,5 +343,6 @@
 			"Name": "Reflex",
 			"Enabled": true
 		}
-	]
+	],
+	"EpicSampleNameHash": "451731683"
 }
