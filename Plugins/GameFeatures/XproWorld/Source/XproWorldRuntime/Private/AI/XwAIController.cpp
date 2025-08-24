@@ -3,6 +3,7 @@
 
 #include "AI/XwAIController.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Components/StateTreeAIComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAIController)
 
@@ -13,6 +14,26 @@ AXwAIController::AXwAIController(const FObjectInitializer& ObjectInitializer)
 	bStopAILogicOnUnposses = false;
 
     MyTeamID = FGenericTeamId::NoTeam;
+
+	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIperception"));
+
+	StateTreeAIComp = CreateDefaultSubobject<UStateTreeAIComponent>(TEXT("StatetreeAI"));
+
+}
+
+void AXwAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	AIPerceptionComp->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::HandleTargetPerceptionInfoUpdated);
+
+}
+
+void AXwAIController::OnUnPossess()
+{
+	AIPerceptionComp->OnTargetPerceptionInfoUpdated.RemoveAll(this);
+
+	Super::OnUnPossess();
 }
 
 void AXwAIController::UpdateTeamAttitude(UAIPerceptionComponent* AIPerception)
@@ -66,4 +87,9 @@ ETeamAttitude::Type AXwAIController::GetTeamAttitudeTowards(const AActor& Other)
 	}
 
 	return ETeamAttitude::Neutral;
+}
+
+void AXwAIController::HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& InUpdateInfo)
+{
+	UE_LOG(LogTemp, Warning, TEXT("HandleTargetPerceptionInfoUpdated: %d"), InUpdateInfo.TargetId);
 }

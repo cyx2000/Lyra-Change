@@ -43,7 +43,7 @@ protected:
 
 	/** #todo find out how to pool the AIControllers. At the moment the controllers are destroyed with APawn::DetachFromControllerPendingDestroy() **/
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<AAIController>> SpawnedBotList;
+	TArray<TWeakObjectPtr<AAIController>> SpawnedBotList;
 
 		/** Always creates a single bot */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Gameplay)

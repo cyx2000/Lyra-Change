@@ -72,6 +72,7 @@ Intermediate/*
 Plugins/**/Intermediate/*
 Plugins/**/Content/*
 Plugins/**/**/Content/*
+Plugins/ConsoleCommandsHelper/*
 
 # Cache files for the editor to use
 DerivedDataCache/*

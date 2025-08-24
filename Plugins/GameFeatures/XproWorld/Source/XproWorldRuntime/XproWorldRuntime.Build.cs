@@ -50,6 +50,8 @@ public class XproWorldRuntime : ModuleRules
 				"ModularGameplay",
 				"DataRegistry",
 				"NavigationSystem",
+				"StateTreeModule",
+				"GameplayStateTreeModule",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

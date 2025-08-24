@@ -2,30 +2,24 @@
 
 
 #include "AI/XwAISpawner.h"
-#include "Engine/EngineTypes.h"
 // #include "Game/XpWorldObjPoolSubsystem.h"
 #include "GameFramework/Pawn.h"
 #include "Character/LyraPawnExtensionComponent.h"
 #include "AbilitySystem/LyraAbilitySystemComponent.h"
-#include "Math/MathFwd.h"
-#include "Misc/AssertionMacros.h"
-#include "Misc/CoreMiscDefines.h"
 #include "Teams/LyraTeamSubsystem.h"
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemGlobals.h"
 #include "AbilitySystem/LyraAbilitySet.h"
 #include "GameModes/LyraExperienceManagerComponent.h"
-#include "Templates/SubclassOf.h"
-#include "UObject/NameTypes.h"
-#include "UObject/Object.h"
 #include "DataRegistrySubsystem.h"
-#include "UObject/UnrealNames.h"
 #include "Game/XpWorldItem.h"
 #include "Inventory/XWorldInventoryItemDefinition.h"
 #include "Inventory/XwPickupableActor.h"
 #include "Inventory/XWInventoryFragment_QuickBarIcon.h"
 #include "AI/XwAICharacter.h"
 #include "NavigationSystem.h"
+#include "AIController.h"
+#include "Character/LyraPawnData.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAISpawner)
 

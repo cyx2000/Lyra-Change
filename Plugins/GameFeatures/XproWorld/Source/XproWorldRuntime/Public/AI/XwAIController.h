@@ -6,6 +6,9 @@
 #include "Teams/LyraTeamAgentInterface.h"
 #include "XwAIController.generated.h"
 
+class UAIPerceptionComponent;
+class UStateTreeAIComponent;
+
 /**
  * 
  */
@@ -29,7 +32,33 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lyra AI Player Controller")
 	void UpdateTeamAttitude(UAIPerceptionComponent* AIPerception);
 
+	FORCEINLINE UAIPerceptionComponent* GetAIPerception() const
+	{
+		return AIPerceptionComp;
+	}
+
+	FORCEINLINE UStateTreeAIComponent* GetStateTreeAI() const
+	{
+		return StateTreeAIComp;
+	}
+
+protected:
+	
+	virtual void OnPossess(APawn* InPawn) override;
+
+	virtual void OnUnPossess() override;
+
+	UFUNCTION()
+	void HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& InUpdateInfo);
+
 private:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Components, meta=(AllowPrivateAccess))
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Components, meta=(AllowPrivateAccess))
+	TObjectPtr<UStateTreeAIComponent> StateTreeAIComp;
+
 	// Keep track of TeamID if there's no PlayerState. No OnRep because AIController only exists on Server 
 	UPROPERTY()
 	FOnLyraTeamIndexChangedDelegate OnTeamChangedDelegate;
