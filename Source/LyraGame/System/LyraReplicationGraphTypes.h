@@ -54,7 +54,8 @@ struct FRepGraphActorClassSettings
 
 		if (FPackageName::IsScriptPackage(ActorClassNameString))
 		{
-			StaticActorClass = FindObject<UClass>(nullptr, *ActorClassNameString, EFindObjectFlags::ExactClass);
+			// StaticActorClass = FindObject<UClass>(nullptr, *ActorClassNameString, EFindObjectFlags::ExactClass); // 5.7
+			StaticActorClass = FindObject<UClass>(nullptr, *ActorClassNameString, true);
 
 			if (!StaticActorClass)
 			{

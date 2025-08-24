@@ -103,12 +103,12 @@ public class LyraGameTarget : TargetRules
 			// return true;
 		}
 
-		bool bIsBuildMachine = Target.AdditionalProperties.GetProperty("IsBuildMachine") == "1";
-		if (bIsBuildMachine)
-		{
+		//bool bIsBuildMachine = Target.AdditionalProperties.GetProperty("IsBuildMachine") == "1";
+		//if (bIsBuildMachine)
+		//{
 			// This could be used to enable all plugins for build machines
 			// return true;
-		}
+		//}
 
 		// By default use the default plugin rules as set by the plugin browser in the editor
 		// This is important because this code may not be run at all for launcher-installed versions of the engine
