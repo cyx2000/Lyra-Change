@@ -74,6 +74,9 @@ Plugins/**/Content/*
 Plugins/**/**/Content/*
 Plugins/ConsoleCommandsHelper/*
 
+!Plugins/**/XproWorld/Content/*
+!Plugins/**/XwItemSystem/Content/*
+
 # Cache files for the editor to use
 DerivedDataCache/*
 /Content
