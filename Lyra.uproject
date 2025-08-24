@@ -41,6 +41,14 @@
 			"Enabled": true
 		},
 		{
+			"Name": "D3DExternalGPUStatistics",
+			"Enabled": true,
+			"Optional": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		},
+		{
 			"Name": "CommonLoadingScreen",
 			"Enabled": true
 		},
@@ -188,6 +196,19 @@
 				"XSX",
 				"WinGDK"
 			]
+		},
+		{
+			"Name": "EOSReservedHooks",
+			"Enabled": true,
+			"Optional": true
+		},
+		{
+			"Name": "OnlineSubsystemEOS",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineServicesEOS",
+			"Enabled": true
 		},
 		{
 			"Name": "OnlineServicesNull",
