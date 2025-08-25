@@ -75,6 +75,8 @@ Plugins/**/**/Content/*
 Plugins/ConsoleCommandsHelper/*
 
 !Plugins/**/XproWorld/Content/*
+!Plugins/**/XproWorldMaps/Content/XproWorldMaps.uasset
+!Plugins/**/XproWorldMaps/Content/_Test/
 !Plugins/**/XwItemSystem/Content/*
 
 # Cache files for the editor to use

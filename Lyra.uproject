@@ -329,6 +329,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "XproWorld",
+			"Enabled": true
+		},
+		{
 			"Name": "GameplayInteractions",
 			"Enabled": true
 		},
