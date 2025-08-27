@@ -10,6 +10,41 @@ class ULyraPawnData;
 class ULyraExperienceDefinition;
 class AAIController;
 class AXwPickupableActor;
+class ULyraAbilitySet;
+class ATargetPoint;
+
+USTRUCT(BlueprintType)
+struct FAISpawnData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AIPawn)
+	TSoftObjectPtr<ULyraPawnData> AIPawnData = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
+	TArray<TSoftObjectPtr<ULyraAbilitySet>> AbilitySets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
+	TObjectPtr<ATargetPoint> SpawnTargetActor;
+};
+
+struct FAISpawnDataList
+{
+
+	FAISpawnDataList()
+		:AIPawnData(nullptr),
+		AbilitySets(nullptr),
+		TargetTransform()
+	{
+
+	}
+	TSoftObjectPtr<ULyraPawnData> AIPawnData;
+
+	const TArray<TSoftObjectPtr<ULyraAbilitySet>>* AbilitySets;
+
+	FTransform TargetTransform;
+
+};
 
 UCLASS(MinimalAPI, Abstract)
 class AXwAISpawner : public AActor
@@ -20,8 +55,8 @@ public:
 	// Sets default values for this actor's properties
 	XPROWORLDRUNTIME_API AXwAISpawner();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Pawn)
-	TMap<TSoftObjectPtr<ULyraPawnData>, uint8> PawnData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AIPawn)
+	TArray<FAISpawnData> AIPawnData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FGenericTeamId TeamID;
@@ -30,8 +65,14 @@ public:
 	float LocationBound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
-	TSubclassOf<AXwPickupableActor> PickupActor;
+	float SpawnTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
+	int32 EveryMaxSpawnCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
+	TSubclassOf<AXwPickupableActor> PickupActor;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,9 +86,9 @@ protected:
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<AAIController>> SpawnedBotList;
 
-		/** Always creates a single bot */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Gameplay)
-	virtual void SpawnOneBot(const ULyraPawnData* WantData, const FVector& Location);
+	/** Always creates a single bot */
+	virtual void SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
+		const TArray<TSoftObjectPtr<ULyraAbilitySet>>* InAbilitySets);
 
 	/** Deletes the last created bot if possible */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Gameplay)
@@ -65,8 +106,14 @@ protected:
 	void OnSpawnedPawnDestroyed(AActor* InDestroyedActor);
 
 	void OnBeforePawnDestroy(AActor* InDestroyedPawn);
+	
+	UFUNCTION()
+	void HandleSpawn();
 
 private:
 	void OnExperienceLoaded(const ULyraExperienceDefinition* Experience);
 
+	TArray<FAISpawnDataList> SpawnList;
+
+	FTimerHandle SpawnTimerHandle;
 };

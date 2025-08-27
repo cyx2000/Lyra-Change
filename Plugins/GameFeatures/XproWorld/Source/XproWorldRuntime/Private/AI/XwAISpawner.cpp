@@ -20,6 +20,7 @@
 #include "NavigationSystem.h"
 #include "AIController.h"
 #include "Character/LyraPawnData.h"
+#include "Engine/TargetPoint.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAISpawner)
 
@@ -28,7 +29,8 @@ AXwAISpawner::AXwAISpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
+	SpawnList.Empty();
+	SpawnedBotList.Empty();
 }
 
 // Called when the game starts or when spawned
@@ -62,41 +64,71 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 		return;
 	}
 
-	// Create them
-	FVector Location = GetActorLocation();
+	FTransform SpawnerTransform = GetActorTransform();
 
 	const bool bNeedRandomLocation = (LocationBound > 50.f);
 
-	for(const auto& SpawnAIData: PawnData)
+	UWorld* World = GetWorld();  //world用各种方式也都可以
+
+	for(const auto& SpawnData: AIPawnData)
 	{
-		ULyraPawnData* LoadedPawnData = SpawnAIData.Key.Get();
-		if (LoadedPawnData == nullptr)
+		check(SpawnData.AIPawnData);
+
+		const bool bHasTargetLocation = (SpawnData.SpawnTargetActor != nullptr);
+
+		SpawnData.AIPawnData.LoadSynchronous();
+
+		FAISpawnDataList& AISpawnData = SpawnList.Emplace_GetRef();
+
+		AISpawnData.AIPawnData = SpawnData.AIPawnData;
+
+		AISpawnData.TargetTransform = bHasTargetLocation ? SpawnData.SpawnTargetActor->GetActorTransform() : SpawnerTransform;
+
+		if(bNeedRandomLocation && !bHasTargetLocation)
 		{
-			LoadedPawnData = SpawnAIData.Key.LoadSynchronous();
+			FNavLocation RandomPoint(SpawnerTransform.GetLocation());
+			UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+			if (NavSys)
+			{
+				NavSys->GetRandomReachablePointInRadius(SpawnerTransform.GetLocation(), 
+				LocationBound, 
+				RandomPoint, 
+				NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate));
+
+				AISpawnData.TargetTransform.SetLocation(RandomPoint.Location);
+			}
 		}
 
-		FVector RandomLocation{ Location };
-
-		check(LoadedPawnData);
-
-		for (uint8 Count = 0; Count < SpawnAIData.Value; ++Count)
+		if(SpawnData.AbilitySets.IsEmpty())
 		{
-			if(bNeedRandomLocation)
-			{
-				FNavLocation RandomPoint(Location);
+			continue;
+		}
 
-				UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-				if (NavSys)
-				{
-					NavSys->GetRandomReachablePointInRadius(Location, LocationBound, RandomPoint, NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate));
-					RandomLocation = RandomPoint.Location;
-				}
-			}
-			SpawnOneBot(LoadedPawnData, RandomLocation);
+		AISpawnData.AbilitySets = &SpawnData.AbilitySets;
+
+		for (const auto& AbilitySet : SpawnData.AbilitySets) 
+		{
+			AbilitySet.LoadSynchronous();
 		}
 	}
+
+	FTimerDelegate Delegate;
+
+	Delegate.BindUObject(this, &ThisClass::HandleSpawn);
+
+	if(SpawnTime > 0.f)
+	{
+		World->GetTimerManager().SetTimer(SpawnTimerHandle, Delegate, SpawnTime, true);
+	}
+	else 
+	{
+		World->GetTimerManager().SetTimerForNextTick(Delegate);
+	}
+
 }
-void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FVector& Location)
+
+void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
+	const TArray<TSoftObjectPtr<ULyraAbilitySet>>* InAbilitySets)
 {
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
@@ -106,12 +138,9 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FVector& Loc
 
 	const bool bHasAIController = BotControllerClass != nullptr;
 
-	// FVector Location = GetActorLocation();
-	FRotator Rotation = GetActorRotation();
-
 	{
 		FActorSpawnParameters ActorSpawnParams;
-		ActorSpawnParams.Owner = this;
+		// ActorSpawnParams.Owner = this;
 		ActorSpawnParams.ObjectFlags |= RF_Transient;	// We never want to save spawned AI pawns into a map
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		// defer spawning the pawn to setup the AIController, else it spawns the default controller on spawn if set to spawn AI on spawn
@@ -121,8 +150,8 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FVector& Loc
 
 		// UXpWorldObjPoolSubsystem* PoolSubsystem = World->GetSubsystem<UXpWorldObjPoolSubsystem>();
 
-		// NewPawn = Cast<APawn>(PoolSubsystem->CreateOrGetActorInternal(WantClass, Location, Rotation, ActorSpawnParams));
-		NewPawn = Cast<APawn>(World->SpawnActor(WantClass, &Location, &Rotation, ActorSpawnParams));
+		// NewPawn = Cast<APawn>(PoolSubsystem->CreateOrGetActorInternal(WantClass, InTransform, ActorSpawnParams));
+		NewPawn = Cast<APawn>(World->SpawnActor(WantClass, &InTransform, ActorSpawnParams));
 
 	}
 
@@ -133,13 +162,14 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FVector& Loc
 		{
 			PawnExtComp->SetPawnData(WantData);
 		}
-		NewPawn->FinishSpawning(FTransform(Rotation, Location, FVector::OneVector));
+		NewPawn->FinishSpawning(InTransform);
 	}
 	
 	bool bWantsPlayerState = true;
-	if (const AAIController* AIController = Cast<AAIController>(NewPawn->Controller))
+	if (AAIController* AIController = Cast<AAIController>(NewPawn->Controller))
 	{
 		bWantsPlayerState = AIController->bWantsPlayerState;
+		AIController->SetOwner(this);
 	}
 	
 	if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
@@ -149,6 +179,14 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FVector& Loc
 		if (ULyraAbilitySystemComponent* AbilitySystemComponent = Cast<ULyraAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(AbilityOwner)))
 		{
 			PawnExtComp->InitializeAbilitySystem(AbilitySystemComponent, AbilityOwner);
+
+			if(InAbilitySets)
+			{
+				for(const auto& AbilitySet: *InAbilitySets)
+				{
+					AbilitySet.Get()->GiveToAbilitySystem(AbilitySystemComponent, nullptr);
+				}
+			}
 		}
 	}
 
@@ -177,7 +215,14 @@ void AXwAISpawner::OnExperienceLoaded(const ULyraExperienceDefinition* Experienc
 #if WITH_SERVER_CODE
 	if(HasAuthority())
 	{
-		ServerCreateBots();
+		// ServerCreateBots();
+		FTimerDelegate Delegate;
+
+		Delegate.BindUObject(this, &ThisClass::ServerCreateBots);
+
+		FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+		TimerManager.SetTimerForNextTick(Delegate);
 	}
 #endif
 }
@@ -332,3 +377,40 @@ void AXwAISpawner::OnSpawnedPawnDestroyed(AActor* InDestroyedActor)
 }
 
 
+void AXwAISpawner::HandleSpawn()
+{
+	const auto CurrentNum = SpawnList.Num();
+
+	uint8 WantNum = CurrentNum > EveryMaxSpawnCount ? EveryMaxSpawnCount : static_cast<uint8>(CurrentNum);
+
+	for(uint8 CurrentIndex = 0; CurrentIndex < WantNum; ++CurrentIndex)
+	{
+		const auto& CurrentSpawnData = SpawnList[CurrentIndex];
+
+		SpawnOneBot(CurrentSpawnData.AIPawnData.Get(), CurrentSpawnData.TargetTransform, CurrentSpawnData.AbilitySets);
+		
+		SpawnList.RemoveAtSwap(CurrentIndex);
+	}
+
+	if (SpawnList.IsEmpty()) 
+	{
+		if(SpawnTime > 0.f)
+		{
+			FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+			TimerManager.ClearTimer(SpawnTimerHandle);
+		}
+	}
+	else
+	{
+		if(SpawnTime <= 0.f)
+		{
+			FTimerDelegate Delegate;
+
+			Delegate.BindUObject(this, &ThisClass::HandleSpawn);
+
+			FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+			TimerManager.SetTimerForNextTick(Delegate);
+		}
+	}
+}
