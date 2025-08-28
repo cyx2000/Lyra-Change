@@ -56,7 +56,7 @@ public:
 	XPROWORLDRUNTIME_API AXwAISpawner();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AIPawn)
-	TArray<FAISpawnData> AIPawnData;
+	TArray<FAISpawnData> AIPawnDataList;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FGenericTeamId TeamID;

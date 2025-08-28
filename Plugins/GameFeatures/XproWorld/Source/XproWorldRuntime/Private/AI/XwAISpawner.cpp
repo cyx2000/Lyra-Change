@@ -70,9 +70,9 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
-	for(const auto& SpawnData: AIPawnData)
+	for(const auto& SpawnData: AIPawnDataList)
 	{
-		check(SpawnData.AIPawnData);
+		check(!SpawnData.AIPawnData.IsNull());
 
 		const bool bHasTargetLocation = (SpawnData.SpawnTargetActor != nullptr);
 
@@ -399,6 +399,7 @@ void AXwAISpawner::HandleSpawn()
 			FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
+		SpawnList.Empty();
 	}
 	else
 	{
