@@ -32,11 +32,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lyra AI Player Controller")
 	void UpdateTeamAttitude(UAIPerceptionComponent* AIPerception);
 
-	FORCEINLINE UAIPerceptionComponent* GetAIPerception() const
-	{
-		return AIPerceptionComp;
-	}
-
 	FORCEINLINE UStateTreeAIComponent* GetStateTreeAI() const
 	{
 		return StateTreeAIComp;
@@ -52,9 +47,6 @@ protected:
 	void HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& InUpdateInfo);
 
 private:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Components, meta=(AllowPrivateAccess))
-	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Components, meta=(AllowPrivateAccess))
 	TObjectPtr<UStateTreeAIComponent> StateTreeAIComp;

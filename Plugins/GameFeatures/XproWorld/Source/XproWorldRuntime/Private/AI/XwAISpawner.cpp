@@ -31,6 +31,7 @@ AXwAISpawner::AXwAISpawner()
 	PrimaryActorTick.bCanEverTick = false;
 	SpawnList.Empty();
 	SpawnedBotList.Empty();
+	EveryMaxSpawnCount = 1;
 }
 
 // Called when the game starts or when spawned
@@ -379,17 +380,22 @@ void AXwAISpawner::OnSpawnedPawnDestroyed(AActor* InDestroyedActor)
 
 void AXwAISpawner::HandleSpawn()
 {
-	const auto CurrentNum = SpawnList.Num();
-
-	uint8 WantNum = CurrentNum > EveryMaxSpawnCount ? EveryMaxSpawnCount : static_cast<uint8>(CurrentNum);
-
-	for(uint8 CurrentIndex = 0; CurrentIndex < WantNum; ++CurrentIndex)
 	{
-		const auto& CurrentSpawnData = SpawnList[CurrentIndex];
+		const auto CurrentNum = SpawnList.Num();
 
-		SpawnOneBot(CurrentSpawnData.AIPawnData.Get(), CurrentSpawnData.TargetTransform, CurrentSpawnData.AbilitySets);
-		
-		SpawnList.RemoveAtSwap(CurrentIndex);
+		check(EveryMaxSpawnCount > 0);
+
+		const uint8 WantNum = CurrentNum > EveryMaxSpawnCount ? static_cast<uint8>(EveryMaxSpawnCount) : static_cast<uint8>(CurrentNum);
+
+		for(uint8 CurrentIndex = 0; CurrentIndex < WantNum; ++CurrentIndex)
+		{
+			auto& CurrentSpawnData = SpawnList[CurrentIndex];
+
+			SpawnOneBot(CurrentSpawnData.AIPawnData.Get(), CurrentSpawnData.TargetTransform, CurrentSpawnData.AbilitySets);
+			
+			SpawnList.RemoveSingleSwap(CurrentSpawnData);
+		}
+
 	}
 
 	if (SpawnList.IsEmpty()) 
@@ -399,7 +405,6 @@ void AXwAISpawner::HandleSpawn()
 			FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 			TimerManager.ClearTimer(SpawnTimerHandle);
 		}
-		SpawnList.Empty();
 	}
 	else
 	{

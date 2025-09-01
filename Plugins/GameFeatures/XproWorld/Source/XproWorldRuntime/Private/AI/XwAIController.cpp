@@ -15,7 +15,7 @@ AXwAIController::AXwAIController(const FObjectInitializer& ObjectInitializer)
 
     MyTeamID = FGenericTeamId::NoTeam;
 
-	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIperception"));
+	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIperception"));
 
 	StateTreeAIComp = CreateDefaultSubobject<UStateTreeAIComponent>(TEXT("StatetreeAI"));
 
@@ -25,13 +25,13 @@ void AXwAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	AIPerceptionComp->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::HandleTargetPerceptionInfoUpdated);
+	PerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::HandleTargetPerceptionInfoUpdated);
 
 }
 
 void AXwAIController::OnUnPossess()
 {
-	AIPerceptionComp->OnTargetPerceptionInfoUpdated.RemoveAll(this);
+	PerceptionComponent->OnTargetPerceptionInfoUpdated.RemoveAll(this);
 
 	Super::OnUnPossess();
 }

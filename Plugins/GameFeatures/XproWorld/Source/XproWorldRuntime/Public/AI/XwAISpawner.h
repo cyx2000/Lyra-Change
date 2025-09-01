@@ -44,6 +44,11 @@ struct FAISpawnDataList
 
 	FTransform TargetTransform;
 
+	const bool operator==(const FAISpawnDataList& InItem) const
+	{
+		return this->AIPawnData == InItem.AIPawnData && this->AbilitySets == InItem.AbilitySets && this->TargetTransform.Equals(InItem.TargetTransform);
+	}
+
 };
 
 UCLASS(MinimalAPI, Abstract)
