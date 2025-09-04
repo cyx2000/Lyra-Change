@@ -25,7 +25,10 @@ struct FAISpawnData
 	TArray<TSoftObjectPtr<ULyraAbilitySet>> AbilitySets;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
-	TObjectPtr<ATargetPoint> SpawnTargetActor;
+	TObjectPtr<ATargetPoint> SpawnTargetActor = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
+	float PatrolSplinePointInputKey = -1.f;
 };
 
 struct FAISpawnDataList

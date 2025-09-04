@@ -21,6 +21,7 @@
 #include "AIController.h"
 #include "Character/LyraPawnData.h"
 #include "Engine/TargetPoint.h"
+#include "Components/SplineComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAISpawner)
 
@@ -65,51 +66,59 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 		return;
 	}
 
-	FTransform SpawnerTransform = GetActorTransform();
-
-	const bool bNeedRandomLocation = (LocationBound > 50.f);
-
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
-	for(const auto& SpawnData: AIPawnDataList)
 	{
-		check(!SpawnData.AIPawnData.IsNull());
+		FTransform SpawnerTransform = GetActorTransform();
 
-		const bool bHasTargetLocation = (SpawnData.SpawnTargetActor != nullptr);
+		const bool bNeedRandomLocation = (LocationBound > 50.f);	
 
-		SpawnData.AIPawnData.LoadSynchronous();
-
-		FAISpawnDataList& AISpawnData = SpawnList.Emplace_GetRef();
-
-		AISpawnData.AIPawnData = SpawnData.AIPawnData;
-
-		AISpawnData.TargetTransform = bHasTargetLocation ? SpawnData.SpawnTargetActor->GetActorTransform() : SpawnerTransform;
-
-		if(bNeedRandomLocation && !bHasTargetLocation)
+		for(const auto& SpawnData: AIPawnDataList)
 		{
-			FNavLocation RandomPoint(SpawnerTransform.GetLocation());
-			UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
-			if (NavSys)
+			check(!SpawnData.AIPawnData.IsNull());
+
+			const bool bHasTargetLocation = (SpawnData.SpawnTargetActor != nullptr);
+
+			SpawnData.AIPawnData.LoadSynchronous();
+
+			FAISpawnDataList& AISpawnData = SpawnList.Emplace_GetRef();
+
+			AISpawnData.AIPawnData = SpawnData.AIPawnData;
+
+			AISpawnData.TargetTransform = bHasTargetLocation ? SpawnData.SpawnTargetActor->GetActorTransform() : SpawnerTransform;
+			if(SpawnData.PatrolSplinePointInputKey >= 0.f)
 			{
-				NavSys->GetRandomReachablePointInRadius(SpawnerTransform.GetLocation(), 
-				LocationBound, 
-				RandomPoint, 
-				NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate));
+				USplineComponent* DefaultSpline = FindComponentByClass<USplineComponent>();
+				check(DefaultSpline);
 
-				AISpawnData.TargetTransform.SetLocation(RandomPoint.Location);
+				AISpawnData.TargetTransform.SetLocation(DefaultSpline->GetLocationAtSplineInputKey(SpawnData.PatrolSplinePointInputKey, ESplineCoordinateSpace::World));
 			}
-		}
+			else if(bNeedRandomLocation && !bHasTargetLocation)
+			{
+				FNavLocation RandomPoint(SpawnerTransform.GetLocation());
+				UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+				if (NavSys)
+				{
+					NavSys->GetRandomReachablePointInRadius(SpawnerTransform.GetLocation(), 
+					LocationBound, 
+					RandomPoint, 
+					NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate));
 
-		if(SpawnData.AbilitySets.IsEmpty())
-		{
-			continue;
-		}
+					AISpawnData.TargetTransform.SetLocation(RandomPoint.Location);
+				}
+			}
 
-		AISpawnData.AbilitySets = &SpawnData.AbilitySets;
+			if(SpawnData.AbilitySets.IsEmpty())
+			{
+				continue;
+			}
 
-		for (const auto& AbilitySet : SpawnData.AbilitySets) 
-		{
-			AbilitySet.LoadSynchronous();
+			AISpawnData.AbilitySets = &SpawnData.AbilitySets;
+
+			for (const auto& AbilitySet : SpawnData.AbilitySets) 
+			{
+				AbilitySet.LoadSynchronous();
+			}
 		}
 	}
 
@@ -381,19 +390,25 @@ void AXwAISpawner::OnSpawnedPawnDestroyed(AActor* InDestroyedActor)
 void AXwAISpawner::HandleSpawn()
 {
 	{
-		const auto CurrentNum = SpawnList.Num();
+		const auto& CurrentNum = SpawnList.Num();
 
 		check(EveryMaxSpawnCount > 0);
 
-		const uint8 WantNum = CurrentNum > EveryMaxSpawnCount ? static_cast<uint8>(EveryMaxSpawnCount) : static_cast<uint8>(CurrentNum);
+		uint8 CanSpawnCount = CurrentNum > EveryMaxSpawnCount ? static_cast<uint8>(EveryMaxSpawnCount) : static_cast<uint8>(CurrentNum);
 
-		for(uint8 CurrentIndex = 0; CurrentIndex < WantNum; ++CurrentIndex)
+		for (auto It = SpawnList.CreateIterator(); It; ++It)
 		{
-			auto& CurrentSpawnData = SpawnList[CurrentIndex];
+			if(CanSpawnCount == 0)
+			{
+				break;
+			}
 
-			SpawnOneBot(CurrentSpawnData.AIPawnData.Get(), CurrentSpawnData.TargetTransform, CurrentSpawnData.AbilitySets);
+			CanSpawnCount -= 1;
+
+			SpawnOneBot(It->AIPawnData.Get(), It->TargetTransform, It->AbilitySets);
 			
-			SpawnList.RemoveSingleSwap(CurrentSpawnData);
+			It.RemoveCurrent();
+
 		}
 
 	}
