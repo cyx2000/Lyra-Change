@@ -61,5 +61,9 @@
 			"Name": "GameplayStateTree",
 			"Enabled": true
 		},
+		{
+			"Name": "PropertyBindingUtils",
+			"Enabled": true
+		},		
 	]
 }
