@@ -61,10 +61,10 @@ void AXwAISpawner::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AXwAISpawner::ServerCreateBots_Implementation()
 {
-	if (BotControllerClass == nullptr)
-	{
-		return;
-	}
+	// if (BotControllerClass == nullptr)
+	// {
+	// 	return;
+	// }
 
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
@@ -146,7 +146,7 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 
 	APawn* NewPawn = nullptr;
 
-	const bool bHasAIController = BotControllerClass != nullptr;
+	// const bool bHasAIController = BotControllerClass != nullptr;
 
 	{
 		FActorSpawnParameters ActorSpawnParams;
@@ -154,7 +154,7 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		ActorSpawnParams.ObjectFlags |= RF_Transient;	// We never want to save spawned AI pawns into a map
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		// defer spawning the pawn to setup the AIController, else it spawns the default controller on spawn if set to spawn AI on spawn
-		ActorSpawnParams.bDeferConstruction = bHasAIController;
+		ActorSpawnParams.bDeferConstruction = true;
 
 		TSubclassOf<AActor> WantClass = WantData->PawnClass;
 
@@ -165,9 +165,11 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 
 	}
 
-	if(bHasAIController)
+	if(BotControllerClass != nullptr)
 	{
 		NewPawn->AIControllerClass = BotControllerClass;
+	}
+	{
 		if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
 		{
 			PawnExtComp->SetPawnData(WantData);

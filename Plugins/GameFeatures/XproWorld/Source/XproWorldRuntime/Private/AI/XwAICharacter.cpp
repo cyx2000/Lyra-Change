@@ -23,6 +23,9 @@ AXwAICharacter::AXwAICharacter(const FObjectInitializer& ObjectInitializer)
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
+	AutoPossessPlayer = EAutoReceiveInput::Disabled;
+	AutoPossessAI = EAutoPossessAI::Spawned;
+
     // These attribute sets will be detected by AbilitySystemComponent::InitializeComponent. Keeping a reference so that the sets don't get garbage collected before that.
 	HealthSet = CreateDefaultSubobject<ULyraHealthSet>(TEXT("HealthSet"));
 	CombatSet = CreateDefaultSubobject<ULyraCombatSet>(TEXT("CombatSet"));
