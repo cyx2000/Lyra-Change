@@ -87,36 +87,32 @@ EStateTreeRunStatus FXwSTT_GetSplinePointOnSpawner::EnterState(FStateTreeExecuti
     check(TargetSpline);
     check(TargetSpline->GetNumberOfSplinePoints() > 2);
 
-    const AXwAICharacter* CurrentPawn = InstanceData.AIController->GetPawn<AXwAICharacter>();
-
-    UAbilitySystemComponent* PawnASC = CurrentPawn->GetAbilitySystemComponent();
-
-    check(PawnASC);
-
     int32& CurrentInputKey = *InstanceData.CurrentSplineInputKey.GetMutablePtr(Context);
 
     int32& CurrentInputKeyAddSize = *InstanceData.SplineInputKeySize.GetMutablePtr(Context);
-
-    const int32 MaxInputKey = TargetSpline->GetNumberOfSplinePoints();
     
-    const int32 FinalIndex = (MaxInputKey - 1);
-
-    const bool bToFinal = CurrentInputKey >= FinalIndex;
-
-    const bool bNeedReset = bToFinal || CurrentInputKey <= 0.f;
-
-    if(bNeedReset && TargetSpline->ComponentHasTag(TEXT("CycleLoop"))) 
     {
-        CurrentInputKey = CurrentInputKeyAddSize > 0 ? ( bToFinal ? 0 : 1) : (bToFinal ? (FinalIndex - 1) : FinalIndex);
-    }
-    else if(bNeedReset)
-    {
-        CurrentInputKeyAddSize = -CurrentInputKeyAddSize;
-        CurrentInputKey += CurrentInputKeyAddSize;
-    }
-    else 
-    {
-        CurrentInputKey += CurrentInputKeyAddSize;
+        const int32 MaxInputKey = TargetSpline->GetNumberOfSplinePoints();
+        
+        const int32 FinalIndex = (MaxInputKey - 1);
+
+        const bool bToFinal = CurrentInputKey >= FinalIndex;
+
+        const bool bNeedReset = bToFinal || CurrentInputKey <= 0.f;
+
+        if(bNeedReset && TargetSpline->ComponentHasTag(TEXT("CycleLoop"))) 
+        {
+            CurrentInputKey = CurrentInputKeyAddSize > 0 ? ( bToFinal ? 0 : 1) : (bToFinal ? (FinalIndex - 1) : FinalIndex);
+        }
+        else if(bNeedReset)
+        {
+            CurrentInputKeyAddSize = -CurrentInputKeyAddSize;
+            CurrentInputKey += CurrentInputKeyAddSize;
+        }
+        else 
+        {
+            CurrentInputKey += CurrentInputKeyAddSize;
+        }
     }
 
     InstanceData.OutSplinePointLocation = TargetSpline->GetLocationAtSplineInputKey(static_cast<float>(CurrentInputKey), ESplineCoordinateSpace::World);
