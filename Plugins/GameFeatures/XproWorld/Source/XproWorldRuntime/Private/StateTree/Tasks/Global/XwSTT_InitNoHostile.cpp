@@ -30,15 +30,15 @@ EStateTreeRunStatus FXwSTT_InitNoHostile::EnterState(FStateTreeExecutionContext&
     UAbilitySystemComponent* PawnASC = CurrentPawn->GetAbilitySystemComponent();
 
 	const FGameplayTagContainer& CurrentTags = PawnASC->GetOwnedGameplayTags();
-	if(CurrentTags.HasTag(InstanceData.SplineTag))
+
+	if(CurrentTags.HasTag(InstanceData.SplineDescendantTag.RequestDirectParent()))
 	{
 		USplineComponent* DefaultSpline = Spawner->FindComponentByClass<USplineComponent>();
 		check(DefaultSpline);
 		*InstanceData.CurrentSplineInputKey.GetMutablePtr(Context) = static_cast<int32>(DefaultSpline->FindInputKeyClosestToWorldLocation(
 			CurrentPawn->GetActorLocation()));
 
-		*InstanceData.SplineInputKeySize.GetMutablePtr(Context) = CurrentTags.HasTag(InstanceData.SplineDescendantTag) ? -1 : 1;
-		
+		*InstanceData.SplineInputKeySize.GetMutablePtr(Context) = CurrentTags.HasTag(InstanceData.SplineDescendantTag) ? -1 : 1;	
 	}
 
 	return EStateTreeRunStatus::Running;

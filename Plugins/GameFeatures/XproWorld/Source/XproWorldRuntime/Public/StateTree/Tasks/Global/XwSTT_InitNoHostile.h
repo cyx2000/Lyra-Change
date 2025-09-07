@@ -23,10 +23,6 @@ struct XPROWORLDRUNTIME_API FXwST_InitNoHostileInstanceData
 	UPROPERTY(EditAnywhere, Category = Parameters)
 	TStateTreePropertyRef<int32> SplineInputKeySize;
 
-    /** Tags to check for in the container. */
-	UPROPERTY(EditAnywhere, Category = Parameter)
-	FGameplayTag SplineTag;
-
     UPROPERTY(EditAnywhere, Category = Parameter)
 	FGameplayTag SplineDescendantTag;
 };

@@ -71,17 +71,21 @@ EStateTreeRunStatus FXwSTT_GetSplinePointOnSpawner::EnterState(FStateTreeExecuti
 
     check(InstanceData.AIController);
 
-    AXwAISpawner* Spawner = Cast<AXwAISpawner>(InstanceData.AIController->GetOwner());
-
     USplineComponent* TargetSpline{ nullptr };
 
-    if(InstanceData.WantSplineName.IsNone())
     {
-        TargetSpline = Spawner->FindComponentByClass<USplineComponent>();
-    }
-    else
-    {
-        TargetSpline = Spawner->FindComponentByTag<USplineComponent>(InstanceData.WantSplineName);
+        AXwAISpawner* Spawner = Cast<AXwAISpawner>(InstanceData.AIController->GetOwner());
+
+        const FName& WantSplineName = InstanceData.WantSplineName;
+
+        if(WantSplineName.IsNone())
+        {
+            TargetSpline = Spawner->FindComponentByClass<USplineComponent>();
+        }
+        else
+        {
+            TargetSpline = Spawner->FindComponentByTag<USplineComponent>(WantSplineName);
+        }
     }
 
     check(TargetSpline);
@@ -90,7 +94,7 @@ EStateTreeRunStatus FXwSTT_GetSplinePointOnSpawner::EnterState(FStateTreeExecuti
     int32& CurrentInputKey = *InstanceData.CurrentSplineInputKey.GetMutablePtr(Context);
 
     int32& CurrentInputKeyAddSize = *InstanceData.SplineInputKeySize.GetMutablePtr(Context);
-    
+
     {
         const int32 MaxInputKey = TargetSpline->GetNumberOfSplinePoints();
         
