@@ -25,6 +25,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAISpawner)
 
+const FName AXwAISpawner::DRAIDataName = FName(TEXT("DR_AIData"));
 // Sets default values
 AXwAISpawner::AXwAISpawner()
 {
@@ -108,17 +109,13 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 				}
 			}
 
-			if(SpawnData.AbilitySets.IsEmpty())
+			if(SpawnData.StateTags.IsEmpty())
 			{
 				continue;
 			}
 
-			AISpawnData.AbilitySets = &SpawnData.AbilitySets;
+			AISpawnData.CustomTags = &SpawnData.StateTags;
 
-			for (const auto& AbilitySet : SpawnData.AbilitySets) 
-			{
-				AbilitySet.LoadSynchronous();
-			}
 		}
 	}
 
@@ -138,7 +135,7 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 }
 
 void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
-	const TArray<TSoftObjectPtr<ULyraAbilitySet>>* InAbilitySets)
+	const TArray<FName>* InStateTags)
 {
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
@@ -184,6 +181,9 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		AIController->SetOwner(this);
 	}
 	
+	if(InStateTags)
+		NewPawn->Tags.Append(*InStateTags);
+
 	if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
 	{
 		AActor* AbilityOwner = bWantsPlayerState ? NewPawn->GetPlayerState() : Cast<AActor>(NewPawn);
@@ -191,14 +191,6 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		if (ULyraAbilitySystemComponent* AbilitySystemComponent = Cast<ULyraAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(AbilityOwner)))
 		{
 			PawnExtComp->InitializeAbilitySystem(AbilitySystemComponent, AbilityOwner);
-
-			if(InAbilitySets)
-			{
-				for(const auto& AbilitySet: *InAbilitySets)
-				{
-					AbilitySet.Get()->GiveToAbilitySystem(AbilitySystemComponent, nullptr);
-				}
-			}
 		}
 	}
 
@@ -407,7 +399,7 @@ void AXwAISpawner::HandleSpawn()
 
 			CanSpawnCount -= 1;
 
-			SpawnOneBot(It->AIPawnData.Get(), It->TargetTransform, It->AbilitySets);
+			SpawnOneBot(It->AIPawnData.Get(), It->TargetTransform, It->CustomTags);
 			
 			It.RemoveCurrent();
 

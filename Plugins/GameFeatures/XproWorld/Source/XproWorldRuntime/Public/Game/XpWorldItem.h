@@ -1,9 +1,10 @@
 #pragma once
 
+#include "StructUtils/PropertyBag.h"
+#include "GameplayEffectTypes.h"
 #include "XpWorldItem.generated.h"
 
 class UStaticMesh;
-struct FGameplayTagContainer;
 class UXWorldInventoryItemDefinition;
 
 USTRUCT(BlueprintType)
@@ -61,3 +62,13 @@ public:
     TArray<FXpWorldConutryItemEntry> Items;
 };
 
+USTRUCT(BlueprintType)
+struct XPROWORLDRUNTIME_API FXpWorldInstanceBag : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, Category = Common)
+	FInstancedPropertyBag XpBag;
+};

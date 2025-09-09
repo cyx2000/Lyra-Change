@@ -12,6 +12,7 @@ class AAIController;
 class AXwPickupableActor;
 class ULyraAbilitySet;
 class ATargetPoint;
+struct FDataRegistryType;
 
 USTRUCT(BlueprintType)
 struct FAISpawnData
@@ -22,7 +23,7 @@ struct FAISpawnData
 	TSoftObjectPtr<ULyraPawnData> AIPawnData = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
-	TArray<TSoftObjectPtr<ULyraAbilitySet>> AbilitySets;
+	TArray<FName> StateTags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
 	TObjectPtr<ATargetPoint> SpawnTargetActor = nullptr;
@@ -36,21 +37,16 @@ struct FAISpawnDataList
 
 	FAISpawnDataList()
 		:AIPawnData(nullptr),
-		AbilitySets(nullptr),
+		CustomTags(nullptr),
 		TargetTransform()
 	{
 
 	}
 	TSoftObjectPtr<ULyraPawnData> AIPawnData;
 
-	const TArray<TSoftObjectPtr<ULyraAbilitySet>>* AbilitySets;
+	const TArray<FName>* CustomTags;
 
 	FTransform TargetTransform;
-
-	const bool operator==(const FAISpawnDataList& InItem) const
-	{
-		return this->AIPawnData == InItem.AIPawnData && this->AbilitySets == InItem.AbilitySets && this->TargetTransform.Equals(InItem.TargetTransform);
-	}
 
 };
 
@@ -80,6 +76,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay)
 	TSubclassOf<AXwPickupableActor> PickupActor;
+
+	static const FName DRAIDataName;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -96,7 +94,7 @@ protected:
 
 	/** Always creates a single bot */
 	virtual void SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
-		const TArray<TSoftObjectPtr<ULyraAbilitySet>>* InAbilitySets);
+		const TArray<FName>* InStateTags);
 
 	/** Deletes the last created bot if possible */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Gameplay)
