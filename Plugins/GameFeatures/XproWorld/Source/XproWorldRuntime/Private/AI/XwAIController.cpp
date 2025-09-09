@@ -4,11 +4,12 @@
 #include "AI/XwAIController.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Components/StateTreeAIComponent.h"
+#include "Navigation/CrowdFollowingComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAIController)
 
 AXwAIController::AXwAIController(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+    : Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
     bWantsPlayerState = false;
 	bStopAILogicOnUnposses = false;
