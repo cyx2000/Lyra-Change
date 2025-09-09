@@ -4,28 +4,28 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/Attributes/LyraAttributeSet.h"
-#include "XpWorldSpeedSet.generated.h"
+#include "XpWorldMoveSet.generated.h"
 
 /**
  * 
  */
 UCLASS(MinimalAPI)
-class UXpWorldSpeedSet : public ULyraAttributeSet
+class UXpWorldMoveSet : public ULyraAttributeSet
 {
 	GENERATED_BODY()
 
 public:
-	XPROWORLDRUNTIME_API UXpWorldSpeedSet();
+	XPROWORLDRUNTIME_API UXpWorldMoveSet();
 
-	ATTRIBUTE_ACCESSORS(UXpWorldSpeedSet, AttackSpeed);
-	ATTRIBUTE_ACCESSORS(UXpWorldSpeedSet, MoveSpeed);
+	ATTRIBUTE_ACCESSORS(UXpWorldMoveSet, AccelerationSpeed);
+	ATTRIBUTE_ACCESSORS(UXpWorldMoveSet, MoveSpeed);
 
 protected:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
-	void OnRep_AttackSpeed(const FGameplayAttributeData& OldValue);
+	void OnRep_AccelerationSpeed(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
 	void OnRep_MoveSpeed(const FGameplayAttributeData& OldValue);
@@ -39,9 +39,9 @@ protected:
 
 private:
 
-	//-100-50%
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AttackSpeed, Category = "XpWorld|Combat", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData AttackSpeed;
+	//-100-200%
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AccelerationSpeed, Category = "XpWorld|Combat", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData AccelerationSpeed;
 
 	//-100-100%
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MoveSpeed, Category = "XpWorld|Combat", Meta = (AllowPrivateAccess = true))

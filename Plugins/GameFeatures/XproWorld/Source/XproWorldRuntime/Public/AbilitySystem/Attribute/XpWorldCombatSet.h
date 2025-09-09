@@ -19,6 +19,7 @@ public:
 
 	ATTRIBUTE_ACCESSORS(UXpWorldCombatSet, Attack);
 	ATTRIBUTE_ACCESSORS(UXpWorldCombatSet, Defense);
+	ATTRIBUTE_ACCESSORS(UXpWorldCombatSet, AttackSpeed);
 
 protected:
 
@@ -28,6 +29,9 @@ protected:
 	void OnRep_Attack(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
+	void OnRep_AttackSpeed(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
 	void OnRep_Defense(const FGameplayAttributeData& OldValue);
 
 	virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
@@ -35,7 +39,7 @@ protected:
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	// virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 
-	void ClampAttribute(float& NewValue) const;
+	void ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const;
 
 private:
 
@@ -47,6 +51,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Defense, Category = "XpWorld|Combat", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData Defense;
 
-
+	//-100-50%
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_AttackSpeed, Category = "XpWorld|Combat", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData AttackSpeed;
 	
 };

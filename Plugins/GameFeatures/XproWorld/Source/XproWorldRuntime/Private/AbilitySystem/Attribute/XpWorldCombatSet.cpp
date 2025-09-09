@@ -17,6 +17,7 @@ void UXpWorldCombatSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Attack, COND_OwnerOnly, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Defense, COND_OwnerOnly, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, AttackSpeed, COND_OwnerOnly, REPNOTIFY_Always);
 }
 
 void UXpWorldCombatSet::OnRep_Attack(const FGameplayAttributeData& OldValue)
@@ -29,24 +30,34 @@ void UXpWorldCombatSet::OnRep_Defense(const FGameplayAttributeData& OldValue)
     GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Defense, OldValue);
 }
 
-
-
-void UXpWorldCombatSet::ClampAttribute(float& NewValue) const
+void UXpWorldCombatSet::OnRep_AttackSpeed(const FGameplayAttributeData& OldValue)
 {
-    NewValue = FMath::Max(NewValue, 0.0f);
+    GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, AttackSpeed, OldValue);
+}
+
+void UXpWorldCombatSet::ClampAttribute(const FGameplayAttribute& Attribute,float& NewValue) const
+{
+    if(Attribute == GetAttackSpeedAttribute())
+    {
+        NewValue = FMath::Clamp(NewValue, -100.f, 50.f);
+    }
+    else 
+    {
+        NewValue = FMath::Max(NewValue, 0.0f);
+    }   
 }
 
 void UXpWorldCombatSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
 {
     Super::PreAttributeBaseChange(Attribute, NewValue);
 
-	ClampAttribute(NewValue);
+	ClampAttribute(Attribute, NewValue);
 }
 
 void UXpWorldCombatSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
     Super::PreAttributeChange(Attribute, NewValue);
 
-	ClampAttribute(NewValue);
+	ClampAttribute(Attribute, NewValue);
 }
 
