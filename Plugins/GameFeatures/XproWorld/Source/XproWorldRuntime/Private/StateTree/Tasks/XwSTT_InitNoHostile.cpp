@@ -1,4 +1,4 @@
-#include "StateTree/Tasks/Global/XwSTT_InitNoHostile.h"
+#include "StateTree/Tasks/XwSTT_InitNoHostile.h"
 #include "AI/XwAISpawner.h"
 #include "AIController.h"
 #include "AI/XwAICharacter.h"
@@ -23,11 +23,16 @@ EStateTreeRunStatus FXwSTT_InitNoHostile::EnterState(FStateTreeExecutionContext&
 
 	AXwAISpawner* Spawner = Cast<AXwAISpawner>(InstanceData.AIController->GetOwner());
 
-	*InstanceData.SpawnerLocation.GetMutablePtr(Context) = Spawner->GetActorLocation();
+	auto& CurrentSpawnerLocation = *InstanceData.SpawnerLocation.GetMutablePtr(Context);
+
+	if(CurrentSpawnerLocation.IsZero())
+	{
+		CurrentSpawnerLocation = Spawner->GetActorLocation();
+	}
 
 	const AXwAICharacter* CurrentPawn = InstanceData.AIController->GetPawn<AXwAICharacter>();
 
-    UAbilitySystemComponent* PawnASC = CurrentPawn->GetAbilitySystemComponent();
+	UAbilitySystemComponent* PawnASC = CurrentPawn->GetAbilitySystemComponent();
 
 	const FGameplayTagContainer& CurrentTags = PawnASC->GetOwnedGameplayTags();
 
@@ -35,11 +40,18 @@ EStateTreeRunStatus FXwSTT_InitNoHostile::EnterState(FStateTreeExecutionContext&
 	{
 		USplineComponent* DefaultSpline = Spawner->FindComponentByClass<USplineComponent>();
 		check(DefaultSpline);
-		*InstanceData.CurrentSplineInputKey.GetMutablePtr(Context) = static_cast<int32>(DefaultSpline->FindInputKeyClosestToWorldLocation(
+
+		auto& CurrentInputKey = *InstanceData.CurrentSplineInputKey.GetMutablePtr(Context);
+		if(CurrentInputKey == INDEX_NONE)
+		{
+			CurrentInputKey = static_cast<int32>(DefaultSpline->FindInputKeyClosestToWorldLocation(
 			CurrentPawn->GetActorLocation()));
+		}
 
 		*InstanceData.SplineInputKeySize.GetMutablePtr(Context) = CurrentTags.HasTag(InstanceData.SplineDescendantTag) ? -1 : 1;	
 	}
+	
+	Context.FinishTask(*this, EStateTreeFinishTaskType::Succeeded);
 
 	return EStateTreeRunStatus::Running;
 }

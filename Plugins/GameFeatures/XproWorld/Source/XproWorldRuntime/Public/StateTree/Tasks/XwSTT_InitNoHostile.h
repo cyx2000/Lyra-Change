@@ -17,7 +17,7 @@ struct XPROWORLDRUNTIME_API FXwST_InitNoHostileInstanceData
 	UPROPERTY(EditAnywhere, Category = Parameter)
 	TStateTreePropertyRef<FVector> SpawnerLocation;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = Parameters)
 	TStateTreePropertyRef<int32> CurrentSplineInputKey;
 
 	UPROPERTY(EditAnywhere, Category = Parameters)

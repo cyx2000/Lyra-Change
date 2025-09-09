@@ -12,7 +12,6 @@ class AAIController;
 class AXwPickupableActor;
 class ULyraAbilitySet;
 class ATargetPoint;
-struct FDataRegistryType;
 
 USTRUCT(BlueprintType)
 struct FAISpawnData
