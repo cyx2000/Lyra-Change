@@ -7,6 +7,8 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XpWorldMoveSet)
 
 UXpWorldMoveSet::UXpWorldMoveSet()
+    :AccelerationSpeed(0.f),
+    MoveSpeed(0.f)
 {
 
 }

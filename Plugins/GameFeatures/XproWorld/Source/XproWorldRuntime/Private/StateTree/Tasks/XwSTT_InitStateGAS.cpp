@@ -33,27 +33,65 @@ EStateTreeRunStatus FXwSTT_InitStateGAS::EnterState(FStateTreeExecutionContext& 
 
 	const FXpWorldInstanceBag* StateDataItem = DRsystem->GetCachedItem<FXpWorldInstanceBag>(WantID);
 	check(StateDataItem);
-	const AActor* Spawner = InstanceData.AIController->GetOwner();
 
 	const AXwAICharacter* ControledPawn = InstanceData.AIController->GetPawn<AXwAICharacter>();
 
-	for (const auto& StateTag : ControledPawn->Tags)
+	ULyraAbilitySystemComponent* EnemyASC = ControledPawn->GetLyraAbilitySystemComponent();
+	
 	{
-		if(auto TagGASPath = StateDataItem->XpBag.GetValueSoftPath(StateTag); TagGASPath.IsValid())
+		if(auto EnemyDefaultArrRef = ControledPawn->XpAIBag.GetArrayRef(CurrentStateName); EnemyDefaultArrRef.IsValid())
 		{
-			auto& WantHandle = InstanceData.CurrentStateAbilitySet.FindOrAdd(StateTag);
-			
-			Cast<ULyraAbilitySet>(TagGASPath.GetValue().TryLoad())->GiveToAbilitySystem(ControledPawn->GetLyraAbilitySystemComponent(), &WantHandle);
+			auto& EnemyDefaultDataArr = EnemyDefaultArrRef.GetValue();
+
+			const auto ArrNum = EnemyDefaultDataArr.Num();
+			for(int32 Idx = 0; Idx < ArrNum; ++Idx)
+			{
+				const auto& StateActionGASName = EnemyDefaultDataArr.GetValueName(Idx).GetValue();
+
+				const auto& DefaultGASSoftPath = StateDataItem->XpBag.GetValueSoftPath(StateActionGASName).GetValue();
+
+				auto& WantHandle = InstanceData.CurrentStateAbilitySet.FindOrAdd(StateActionGASName);
+
+				Cast<ULyraAbilitySet>(DefaultGASSoftPath.TryLoad())->GiveToAbilitySystem(EnemyASC, &WantHandle);
+			}
 		}
 	}
 
+	{
+		auto& CurrentPawnName = ControledPawn->EnemyName;
+
+		WantID.ItemName = CurrentPawnName;
+		const FXpWorldInstanceBag* EnemyPawnData = DRsystem->GetCachedItem<FXpWorldInstanceBag>(WantID);
+
+		if(EnemyPawnData)
+		{
+			auto NameArrRes = EnemyPawnData->XpBag.GetArrayRef(CurrentStateName).TryGetValue();
+
+			const auto ArrNum = NameArrRes->Num();
+			for(int32 Idx = 0; Idx < ArrNum; ++Idx)
+			{
+				const auto& StateActionGASName = NameArrRes->GetValueName(Idx).GetValue();
+
+				const auto& GASSoftPath = StateDataItem->XpBag.GetValueSoftPath(StateActionGASName).GetValue();
+
+				auto& WantHandle = InstanceData.CurrentStateAbilitySet.FindOrAdd(StateActionGASName);
+
+				Cast<ULyraAbilitySet>(GASSoftPath.TryLoad())->GiveToAbilitySystem(EnemyASC, &WantHandle);
+			}
+		}
+	}
+	
+	const AActor* Spawner = InstanceData.AIController->GetOwner();
+	
 	for (const auto& StateTag : Spawner->Tags)
 	{
-		if(auto TagGASPath = StateDataItem->XpBag.GetValueSoftPath(StateTag); TagGASPath.IsValid())
+		if(auto TagGASSoftPath = StateDataItem->XpBag.GetValueSoftPath(StateTag); TagGASSoftPath.IsValid())
 		{
 			auto& WantHandle = InstanceData.CurrentStateAbilitySet.FindOrAdd(StateTag);
-			
-			Cast<ULyraAbilitySet>(TagGASPath.GetValue().TryLoad())->GiveToAbilitySystem(ControledPawn->GetLyraAbilitySystemComponent(), &WantHandle);
+
+			const auto& GASSoftPath = TagGASSoftPath.GetValue();
+
+			Cast<ULyraAbilitySet>(GASSoftPath.TryLoad())->GiveToAbilitySystem(EnemyASC, &WantHandle);
 		}
 	}
 

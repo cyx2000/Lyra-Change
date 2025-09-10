@@ -18,11 +18,8 @@ struct FAISpawnData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AIPawn)
-	TSoftObjectPtr<ULyraPawnData> AIPawnData = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
-	TArray<FName> StateTags;
+	FName EnemyData = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AIPawn)
 	TObjectPtr<ATargetPoint> SpawnTargetActor = nullptr;
@@ -36,14 +33,14 @@ struct FAISpawnDataList
 
 	FAISpawnDataList()
 		:AIPawnData(nullptr),
-		CustomTags(nullptr),
+		InEnemyName(nullptr),
 		TargetTransform()
 	{
 
 	}
 	TSoftObjectPtr<ULyraPawnData> AIPawnData;
 
-	const TArray<FName>* CustomTags;
+	const FName* InEnemyName;
 
 	FTransform TargetTransform;
 
@@ -77,6 +74,10 @@ public:
 	TSubclassOf<AXwPickupableActor> PickupActor;
 
 	static const FName DRAIDataName;
+
+	static const FName AIEnemyName;
+
+	static const FName EnemyPawnData;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -93,7 +94,7 @@ protected:
 
 	/** Always creates a single bot */
 	virtual void SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
-		const TArray<FName>* InStateTags);
+		const FName* InStateTags);
 
 	/** Deletes the last created bot if possible */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Gameplay)

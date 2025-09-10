@@ -9,7 +9,9 @@
 #include "Character/LyraPawnExtensionComponent.h" // @Game-Change 
 #include "AbilitySystem/LyraAbilitySet.h" // @Game-Change 
 #include "Components/GameFrameworkComponentManager.h"  // @Game-Change 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
+#include "AbilitySystem/Attribute/XpWorldMoveSet.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAICharacter)
 
@@ -81,4 +83,32 @@ void AXwAICharacter::OnDeathStarted(AActor* OwningActor)
 	Super::OnDeathStarted(OwningActor);
 
 	// BeforeDestory(OwningActor);
+}
+
+void AXwAICharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetMoveSpeedAttribute()).AddUObject(this, &ThisClass::HandleAttributeChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetAccelerationSpeedAttribute()).AddUObject(this, &ThisClass::HandleAttributeChanged);
+}
+
+void AXwAICharacter::UnPossessed()
+{
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetMoveSpeedAttribute()).RemoveAll(this);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetAccelerationSpeedAttribute()).RemoveAll(this);
+	Super::UnPossessed();
+}
+
+void AXwAICharacter::HandleAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	if(Data.Attribute == UXpWorldMoveSet::GetMoveSpeedAttribute())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = (1.f + (Data.NewValue / 100.f)) * Cast<ACharacter>(GetClass()->GetDefaultObject())->GetCharacterMovement()->MaxWalkSpeed;
+	}
+	else if(Data.Attribute == UXpWorldMoveSet::GetAccelerationSpeedAttribute())
+	{
+		GetCharacterMovement()->MaxAcceleration = (1.f + (Data.NewValue / 100.f)) * Cast<ACharacter>(GetClass()->GetDefaultObject())->GetCharacterMovement()->MaxAcceleration;
+	}
 }

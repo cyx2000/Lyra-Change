@@ -26,6 +26,8 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAISpawner)
 
 const FName AXwAISpawner::DRAIDataName = FName(TEXT("DR_AIData"));
+const FName AXwAISpawner::AIEnemyName = FName(TEXT("AIEnemy"));
+const FName AXwAISpawner::EnemyPawnData = FName(TEXT("AIPawnData"));
 // Sets default values
 AXwAISpawner::AXwAISpawner()
 {
@@ -72,19 +74,41 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 	{
 		FTransform SpawnerTransform = GetActorTransform();
 
-		const bool bNeedRandomLocation = (LocationBound > 50.f);	
+		const bool bNeedRandomLocation = (LocationBound > 50.f);
+		
+		UDataRegistrySubsystem* DRsystem = UDataRegistrySubsystem::Get();
+
+		check(DRsystem);
+
+		FDataRegistryId WantID(AXwAISpawner::DRAIDataName, AIEnemyName);
+
+		const FXpWorldInstanceBag* EnemyData = DRsystem->GetCachedItem<FXpWorldInstanceBag>(WantID);
+		check(EnemyData);
 
 		for(const auto& SpawnData: AIPawnDataList)
 		{
-			check(!SpawnData.AIPawnData.IsNull());
+			FSoftObjectPath OutAIPawnData;
+			if(auto TagGASPath = EnemyData->XpBag.GetValueSoftPath(SpawnData.EnemyData); TagGASPath.IsValid())
+			{
+				OutAIPawnData = TagGASPath.GetValue();
+			}
+			else 
+			{
+				WantID.ItemName = SpawnData.EnemyData;
+				const FXpWorldInstanceBag* InstanceEnemyData = DRsystem->GetCachedItem<FXpWorldInstanceBag>(WantID);
+				check(InstanceEnemyData);
+				const auto& SpawnPawnData = InstanceEnemyData->XpBag.GetValueName(EnemyPawnData).GetValue();
+
+				OutAIPawnData = EnemyData->XpBag.GetValueSoftPath(SpawnPawnData).GetValue();
+			}
+			
+			OutAIPawnData.TryLoad();
 
 			const bool bHasTargetLocation = (SpawnData.SpawnTargetActor != nullptr);
 
-			SpawnData.AIPawnData.LoadSynchronous();
-
 			FAISpawnDataList& AISpawnData = SpawnList.Emplace_GetRef();
 
-			AISpawnData.AIPawnData = SpawnData.AIPawnData;
+			AISpawnData.AIPawnData = OutAIPawnData;
 
 			AISpawnData.TargetTransform = bHasTargetLocation ? SpawnData.SpawnTargetActor->GetActorTransform() : SpawnerTransform;
 			if(SpawnData.PatrolSplinePointInputKey >= 0.f)
@@ -109,12 +133,7 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 				}
 			}
 
-			if(SpawnData.StateTags.IsEmpty())
-			{
-				continue;
-			}
-
-			AISpawnData.CustomTags = &SpawnData.StateTags;
+			AISpawnData.InEnemyName = &SpawnData.EnemyData;
 
 		}
 	}
@@ -135,13 +154,13 @@ void AXwAISpawner::ServerCreateBots_Implementation()
 }
 
 void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& InTransform, 
-	const TArray<FName>* InStateTags)
+	const FName* InEnemyNameData)
 {
 	UWorld* World = GetWorld();  //world用各种方式也都可以
 
 	check(World);
 
-	APawn* NewPawn = nullptr;
+	AXwAICharacter* NewPawn = nullptr;
 
 	// const bool bHasAIController = BotControllerClass != nullptr;
 
@@ -158,7 +177,7 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		// UXpWorldObjPoolSubsystem* PoolSubsystem = World->GetSubsystem<UXpWorldObjPoolSubsystem>();
 
 		// NewPawn = Cast<APawn>(PoolSubsystem->CreateOrGetActorInternal(WantClass, InTransform, ActorSpawnParams));
-		NewPawn = Cast<APawn>(World->SpawnActor(WantClass, &InTransform, ActorSpawnParams));
+		NewPawn = Cast<AXwAICharacter>(World->SpawnActor(WantClass, &InTransform, ActorSpawnParams));
 
 	}
 
@@ -181,8 +200,10 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		AIController->SetOwner(this);
 	}
 	
-	if(InStateTags)
-		NewPawn->Tags.Append(*InStateTags);
+	if(InEnemyNameData)
+	{
+		NewPawn->EnemyName = *InEnemyNameData;
+	}
 
 	if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
 	{
@@ -399,7 +420,7 @@ void AXwAISpawner::HandleSpawn()
 
 			CanSpawnCount -= 1;
 
-			SpawnOneBot(It->AIPawnData.Get(), It->TargetTransform, It->CustomTags);
+			SpawnOneBot(It->AIPawnData.Get(), It->TargetTransform, It->InEnemyName);
 			
 			It.RemoveCurrent();
 
