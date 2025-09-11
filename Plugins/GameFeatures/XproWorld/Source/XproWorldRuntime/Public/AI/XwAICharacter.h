@@ -48,6 +48,9 @@ protected:
 
 	void HandleAttributeChanged(const FOnAttributeChangeData& Data);
 
+	UFUNCTION()
+	void HandleHealthChanged(ULyraHealthComponent* InHealthComponent, float OldValue, float NewValue, AActor* CurrentInstigator);
+
 	/* @Game-Change end since the ability system lives here and not on the playerState we want to set the ability set here */
 private:
 

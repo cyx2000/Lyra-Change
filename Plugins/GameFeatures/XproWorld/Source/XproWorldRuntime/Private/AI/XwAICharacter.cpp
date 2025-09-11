@@ -12,6 +12,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "AbilitySystem/Attribute/XpWorldMoveSet.h"
+#include "Character/LyraHealthComponent.h"
+#include "GameFramework/PlayerState.h"
+#include "Perception/AIPerceptionSystem.h"
+#include "Perception/AISense_Damage.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAICharacter)
 
@@ -38,9 +42,6 @@ AXwAICharacter::AXwAICharacter(const FObjectInitializer& ObjectInitializer)
 void AXwAICharacter::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
-
-	check(AbilitySystemComponent);
-	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 UAbilitySystemComponent* AXwAICharacter::GetAbilitySystemComponent() const
@@ -67,11 +68,6 @@ void AXwAICharacter::OnAbilitySystemInitialized()
 {
 	Super::OnAbilitySystemInitialized();
 
-    if (GetLocalRole() != ROLE_Authority)
-	{
-		return;
-	}
-
 	if (const ULyraPawnExtensionComponent* LyraPawnExtensionComponent = ULyraPawnExtensionComponent::FindPawnExtensionComponent(this))
 	{
 		SetPawnData(LyraPawnExtensionComponent->GetPawnData<ULyraPawnData>());
@@ -88,6 +84,8 @@ void AXwAICharacter::OnDeathStarted(AActor* OwningActor)
 void AXwAICharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	GetLyraHealthComponent()->OnHealthChanged.AddDynamic(this, &ThisClass::HandleHealthChanged);
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetMoveSpeedAttribute()).AddUObject(this, &ThisClass::HandleAttributeChanged);
 	
@@ -96,6 +94,9 @@ void AXwAICharacter::PossessedBy(AController* NewController)
 
 void AXwAICharacter::UnPossessed()
 {
+
+	GetLyraHealthComponent()->OnHealthChanged.RemoveAll(this);
+
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetMoveSpeedAttribute()).RemoveAll(this);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UXpWorldMoveSet::GetAccelerationSpeedAttribute()).RemoveAll(this);
 	Super::UnPossessed();
@@ -111,4 +112,19 @@ void AXwAICharacter::HandleAttributeChanged(const FOnAttributeChangeData& Data)
 	{
 		GetCharacterMovement()->MaxAcceleration = (1.f + (Data.NewValue / 100.f)) * Cast<ACharacter>(GetClass()->GetDefaultObject())->GetCharacterMovement()->MaxAcceleration;
 	}
+}
+
+void AXwAICharacter::HandleHealthChanged(ULyraHealthComponent* HealthComponent, float OldValue, float NewValue, AActor* Instigator)
+{
+	if(!Instigator) return;
+
+	AActor* InstigatorPawn{ Instigator };
+	
+	if(auto PS = Cast<APlayerState>(Instigator))
+	{
+		InstigatorPawn = PS->GetPawn();	
+	}
+
+	FAIDamageEvent Event(Cast<AActor>(GetController()), InstigatorPawn, (OldValue - NewValue), InstigatorPawn->GetActorLocation());
+	UAIPerceptionSystem::OnEvent(GetWorld(), Event);
 }
