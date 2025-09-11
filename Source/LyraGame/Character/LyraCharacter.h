@@ -148,6 +148,16 @@ public:
 
 	UE_API virtual bool UpdateSharedReplication();
 
+	UE_API FORCEINLINE ULyraHealthComponent* GetLyraHealthComponent() const
+	{
+		return HealthComponent;
+	}
+
+	UE_API FORCEINLINE ULyraPawnExtensionComponent* GetLyraPawnExtComponent() const
+	{
+		return PawnExtComponent;
+	}
+
 protected:
 
 	UE_API virtual void OnAbilitySystemInitialized();
