@@ -185,19 +185,23 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 	{
 		NewPawn->AIControllerClass = BotControllerClass;
 	}
+
+	ULyraPawnExtensionComponent* PawnExtComp = NewPawn->GetLyraPawnExtComponent();
+	check(PawnExtComp);
+	
 	{
-		if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
-		{
-			PawnExtComp->SetPawnData(WantData);
-		}
+		PawnExtComp->SetPawnData(WantData);
 		NewPawn->FinishSpawning(InTransform);
 	}
 	
 	bool bWantsPlayerState = true;
-	if (AAIController* AIController = Cast<AAIController>(NewPawn->Controller))
+
 	{
-		bWantsPlayerState = AIController->bWantsPlayerState;
-		AIController->SetOwner(this);
+		AAIController* WantAIController = Cast<AAIController>(NewPawn->Controller);
+		check(WantAIController);
+
+		bWantsPlayerState = WantAIController->bWantsPlayerState;
+		WantAIController->SetOwner(this);
 	}
 	
 	if(InEnemyNameData)
@@ -205,7 +209,6 @@ void AXwAISpawner::SpawnOneBot(const ULyraPawnData* WantData, const FTransform& 
 		NewPawn->EnemyName = *InEnemyNameData;
 	}
 
-	if (ULyraPawnExtensionComponent* PawnExtComp = ULyraPawnExtensionComponent::FindPawnExtensionComponent(NewPawn))
 	{
 		AActor* AbilityOwner = bWantsPlayerState ? NewPawn->GetPlayerState() : Cast<AActor>(NewPawn);
 		
