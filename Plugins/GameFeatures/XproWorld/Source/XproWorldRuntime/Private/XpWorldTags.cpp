@@ -8,4 +8,7 @@ namespace XpWorldTags
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(DamageType_Elemental_Black, "DamageType.Elemental.Black", "Inventory item Task");
 
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Action_Interaction_Pickup, "Ability.Type.Action.Interaction.Pickup", "Pickup item Ability");
+
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(ST_State_FoundHostile, "XwAI.State.FoundHostile", "StateTree event tag");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(ST_State_AttackHostile, "XwAI.State.AttackHostile", "StateTree event tag");
 }

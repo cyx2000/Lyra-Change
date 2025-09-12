@@ -5,6 +5,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Components/StateTreeAIComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
+#include "Perception/AISense_Sight.h"
+#include "XpWorldTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwAIController)
 
@@ -92,5 +94,20 @@ ETeamAttitude::Type AXwAIController::GetTeamAttitudeTowards(const AActor& Other)
 
 void AXwAIController::HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& InUpdateInfo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("HandleTargetPerceptionInfoUpdated: %d"), InUpdateInfo.TargetId);
+
+	auto CurrentSense = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), InUpdateInfo.Stimulus);
+
+	static FName ControllerName(TEXT("XwAIController"));
+
+	if(CurrentSense == UAISense_Sight::StaticClass())
+	{
+		if(InUpdateInfo.Stimulus.WasSuccessfullySensed())
+		{
+			GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_FoundHostile, FConstStructView(), ControllerName);
+		}
+	}
+	else
+	{
+		GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_AttackHostile, FConstStructView(), ControllerName);
+	}
 }

@@ -68,10 +68,7 @@ void AXwAICharacter::OnAbilitySystemInitialized()
 {
 	Super::OnAbilitySystemInitialized();
 
-	if (const ULyraPawnExtensionComponent* LyraPawnExtensionComponent = ULyraPawnExtensionComponent::FindPawnExtensionComponent(this))
-	{
-		SetPawnData(LyraPawnExtensionComponent->GetPawnData<ULyraPawnData>());
-	}
+	SetPawnData(GetLyraPawnExtComponent()->GetPawnData<ULyraPawnData>());
 }
 
 void AXwAICharacter::OnDeathStarted(AActor* OwningActor)
@@ -116,7 +113,9 @@ void AXwAICharacter::HandleAttributeChanged(const FOnAttributeChangeData& Data)
 
 void AXwAICharacter::HandleHealthChanged(ULyraHealthComponent* HealthComponent, float OldValue, float NewValue, AActor* Instigator)
 {
-	if(!Instigator) return;
+	const float DamageAmount = OldValue - NewValue;
+
+	if(DamageAmount <= 0 || !Instigator) return;
 
 	AActor* InstigatorPawn{ Instigator };
 	
@@ -125,6 +124,6 @@ void AXwAICharacter::HandleHealthChanged(ULyraHealthComponent* HealthComponent, 
 		InstigatorPawn = PS->GetPawn();	
 	}
 
-	FAIDamageEvent Event(Cast<AActor>(GetController()), InstigatorPawn, (OldValue - NewValue), InstigatorPawn->GetActorLocation());
+	FAIDamageEvent Event(Cast<AActor>(GetController()), InstigatorPawn, DamageAmount, InstigatorPawn->GetActorLocation());
 	UAIPerceptionSystem::OnEvent(GetWorld(), Event);
 }

@@ -14,7 +14,7 @@ struct XPROWORLDRUNTIME_API FXwST_InitNoHostileInstanceData
     UPROPERTY(EditAnywhere, Category = Context)
 	TObjectPtr<AAIController> AIController = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = Parameter)
+	UPROPERTY(EditAnywhere, Category = Parameters)
 	TStateTreePropertyRef<FVector> SpawnerLocation;
 
     UPROPERTY(EditAnywhere, Category = Parameters)
@@ -23,7 +23,7 @@ struct XPROWORLDRUNTIME_API FXwST_InitNoHostileInstanceData
 	UPROPERTY(EditAnywhere, Category = Parameters)
 	TStateTreePropertyRef<int32> SplineInputKeySize;
 
-    UPROPERTY(EditAnywhere, Category = Parameter)
+    UPROPERTY(EditAnywhere, Category = Parameters)
 	FGameplayTag SplineDescendantTag;
 };
 

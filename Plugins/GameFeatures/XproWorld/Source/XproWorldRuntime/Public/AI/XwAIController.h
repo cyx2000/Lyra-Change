@@ -32,7 +32,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lyra AI Player Controller")
 	void UpdateTeamAttitude(UAIPerceptionComponent* AIPerception);
 
-	FORCEINLINE UStateTreeAIComponent* GetStateTreeAI() const
+	FORCEINLINE UStateTreeAIComponent* GetStateTreeAIComp() const
 	{
 		return StateTreeAIComp;
 	}
