@@ -2,6 +2,7 @@
 
 
 #include "AI/XwAIController.h"
+#include "AI/XwAICharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Components/StateTreeAIComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
@@ -95,19 +96,26 @@ ETeamAttitude::Type AXwAIController::GetTeamAttitudeTowards(const AActor& Other)
 void AXwAIController::HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& InUpdateInfo)
 {
 
-	auto CurrentSense = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), InUpdateInfo.Stimulus);
+	auto CurrentTiggerSense = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), InUpdateInfo.Stimulus);
 
 	static FName ControllerName(TEXT("XwAIController"));
 
-	if(CurrentSense == UAISense_Sight::StaticClass())
-	{
+	if(CurrentTiggerSense == UAISense_Sight::StaticClass())
+	{	
 		if(InUpdateInfo.Stimulus.WasSuccessfullySensed())
 		{
-			GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_FoundHostile, FConstStructView(), ControllerName);
+			if(!(GetPawn<AXwAICharacter>()->XpAIBag.FindPropertyDescByName(ControllerName)))
+			{
+				GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_FoundHostile, FConstStructView(), ControllerName);
+				GetPawn<AXwAICharacter>()->XpAIBag.AddProperty(ControllerName, EPropertyBagPropertyType::Bool);
+				return;
+			}	
 		}
+		else
+		{
+			return;
+		}		
 	}
-	else
-	{
-		GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_AttackHostile, FConstStructView(), ControllerName);
-	}
+
+	GetStateTreeAIComp()->SendStateTreeEvent(XpWorldTags::ST_State_AttackHostile, FConstStructView(), ControllerName);
 }
