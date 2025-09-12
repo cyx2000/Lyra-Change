@@ -200,6 +200,16 @@ public:
 	 */
 	UE_API void UnregisterListener(FGameplayMessageListenerHandle Handle);
 
+	// Internal helper for broadcasting a message
+	UE_API void BroadcastMessageInternal(FGameplayTag Channel, const UScriptStruct* StructType, const void* MessageBytes);
+
+	// Internal helper for registering a message listener
+	UE_API FGameplayMessageListenerHandle RegisterListenerInternal(
+		FGameplayTag Channel, 
+		TFunction<void(FGameplayTag, const UScriptStruct*, const void*)>&& Callback,
+		const UScriptStruct* StructType,
+		EGameplayMessageMatch MatchType);
+
 protected:
 	/**
 	 * Broadcast a message on the specified channel
@@ -213,15 +223,6 @@ protected:
 	DECLARE_FUNCTION(execK2_BroadcastMessage);
 
 private:
-	// Internal helper for broadcasting a message
-	UE_API void BroadcastMessageInternal(FGameplayTag Channel, const UScriptStruct* StructType, const void* MessageBytes);
-
-	// Internal helper for registering a message listener
-	UE_API FGameplayMessageListenerHandle RegisterListenerInternal(
-		FGameplayTag Channel, 
-		TFunction<void(FGameplayTag, const UScriptStruct*, const void*)>&& Callback,
-		const UScriptStruct* StructType,
-		EGameplayMessageMatch MatchType);
 
 	UE_API void UnregisterListenerInternal(FGameplayTag Channel, int32 HandleID);
 
