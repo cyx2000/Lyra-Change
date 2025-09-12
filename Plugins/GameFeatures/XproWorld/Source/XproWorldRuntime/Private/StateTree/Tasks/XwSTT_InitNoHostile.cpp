@@ -5,6 +5,8 @@
 #include "AbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameplayTagContainer.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XwSTT_InitNoHostile)
 
@@ -49,6 +51,13 @@ EStateTreeRunStatus FXwSTT_InitNoHostile::EnterState(FStateTreeExecutionContext&
 		}
 
 		*InstanceData.SplineInputKeySize.GetMutablePtr(Context) = CurrentTags.HasTag(InstanceData.SplineDescendantTag) ? -1 : 1;	
+	}
+
+	{
+		UAIPerceptionComponent* Percetion = InstanceData.AIController->GetAIPerceptionComponent();
+		auto SightConfig = Percetion->GetSenseConfig<UAISenseConfig_Sight>();
+		SightConfig->SetStartsEnabled(true);
+		Percetion->UpdatePerceptionAllowList(SightConfig->GetSenseID(), true);
 	}
 	
 	Context.FinishTask(*this, EStateTreeFinishTaskType::Succeeded);
