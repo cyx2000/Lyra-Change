@@ -53,6 +53,7 @@ public class XproWorldRuntime : ModuleRules
 				"StateTreeModule",
 				"GameplayStateTreeModule",
 				"PropertyBindingUtils",
+				"GameplayMessageRuntime",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
